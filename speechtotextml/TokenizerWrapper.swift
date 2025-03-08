@@ -1,10 +1,3 @@
-//
-//  TokenizerWrapper.swift
-//  speechtotextml
-//
-//  Created by Richard Borowski on 3/6/25.
-//
-
 import Tokenizers
 import Foundation
 
@@ -30,11 +23,14 @@ class TokenizerWrapper {
         return re
     }
     
-    func padTokensAndMask(text: String) throws -> ([Int], [Int]) {
+    func padTokensAndMask(text: String) throws -> ([Int], [Int], Int) {
+            print(text)
             var paddedTokens = try encode(text: text)
+            let len = paddedTokens.count
             var attentionMask = [Int]()
             
             let paddingToken = 50256
+            
             
             while paddedTokens.count < 128 {
                 paddedTokens.append(paddingToken)
@@ -52,7 +48,7 @@ class TokenizerWrapper {
                 }
             }
             
-            return (paddedTokens, attentionMask)
+            return (paddedTokens, attentionMask, len)
     }
     
 }

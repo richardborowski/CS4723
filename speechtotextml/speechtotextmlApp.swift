@@ -1,10 +1,3 @@
-//
-//  speechtotextmlApp.swift
-//  speechtotextml
-//
-//  Created by Richard Borowski on 3/6/25.
-//
-
 import SwiftUI
 
 @main
