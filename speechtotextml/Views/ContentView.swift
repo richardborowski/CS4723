@@ -73,14 +73,14 @@ struct ContentView: View {
         
         let output = try model.prediction(input_ids: inputTokens, attention_mask: inputMask)
     
-        var logitsArray: [Float] = []
+        let logitsArray: [Float] = []
         var lastTokenLogits: [Float] = []
         if let logits = output.featureValue(for: "logits")?.multiArrayValue {
-            let vocabSize = logits.shape[2].intValue  // Vocabulary size (e.g., 50257 for GPT-based models)
+            let vocabSize = logits.shape[2].intValue
 
     
             for i in 0..<vocabSize {
-                let index = (size - 1) * vocabSize + i  // Compute index for last token
+                let index = (size - 1) * vocabSize + i  
                 lastTokenLogits.append(logits[index].floatValue)
             }
 
@@ -89,8 +89,8 @@ struct ContentView: View {
         let smLogits = softmax(logits: lastTokenLogits)
         print("Softmax of last token:", smLogits)
         let num = 10
-        var topNLTokens = getTopNIndices(probabilities: logitsArray, n: num)
-        var topTokens = getTopNIndices(probabilities: smLogits, n: num)
+        _ = getTopNIndices(probabilities: logitsArray, n: num)
+        let topTokens = getTopNIndices(probabilities: smLogits, n: num)
     
         self.outputTokens.removeAll()
         for i in 0..<num {

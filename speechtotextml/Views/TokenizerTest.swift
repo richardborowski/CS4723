@@ -21,7 +21,7 @@ struct TokenizerTest: View {
             Button("Encode Text") {
                 Task {
                     do {
-                        encodedText = try await tokenizerWrapper.encode(text: inputText)
+                        encodedText = try tokenizerWrapper.encode(text: inputText)
                         resultText = "Text encoded successfully!"
                     } catch {
                         resultText = "Error encoding text: \(error.localizedDescription)"
@@ -40,14 +40,10 @@ struct TokenizerTest: View {
             
             Button("Decode Text") {
                 Task {
-                    do {
-                        let tokens = inputTokens.split(separator: " ").compactMap { Int($0) }
+                    let tokens = inputTokens.split(separator: " ").compactMap { Int($0) }
                         
-                        decodedText = tokenizerWrapper.decode(tokens: tokens)
-                        resultText = "Text decoded successfully!"
-                    } catch {
-                        resultText = "Error decoding text: \(error.localizedDescription)"
-                    }
+                    decodedText = tokenizerWrapper.decode(tokens: tokens)
+                    resultText = "Text decoded successfully!"
                 }
             }
             .padding()

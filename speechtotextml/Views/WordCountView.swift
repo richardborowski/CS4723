@@ -1,10 +1,3 @@
-//
-//  WordCountView.swift
-//  speechtotextml
-//
-//  Created by Richard Borowski on 4/1/25.
-//
-
 import SwiftUI
 
 struct WordCountView: View {
