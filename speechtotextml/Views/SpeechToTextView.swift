@@ -2,8 +2,9 @@ import SwiftUI
 import AVFoundation
 import Speech
 import CoreML
+
 struct SpeechToTextView: View {
-    
+
     @State private var text = ""
     @State private var isRecording = false
     @State private var startButtonEnabled = true
@@ -22,15 +23,15 @@ struct SpeechToTextView: View {
     @State private var outputTokens: [String] = []
     @State private var tokenizerWrapper = TokenizerWrapper()
     
-    @State private var timer: Timer? = nil
+    @Binding var wordCountDictionary: [String: Int]
 
     var coreMLModel: Model!
 
-    
-    init() {
+    init(wordCountDictionary: Binding<[String: Int]>) {
         audioEngine = AVAudioEngine()
+        _wordCountDictionary = wordCountDictionary
     }
-    
+
     var body: some View {
         VStack {
             Text(text)
@@ -62,8 +63,7 @@ struct SpeechToTextView: View {
             requestPermissions()
         }
     }
-    
-    
+
     private func startButtonPressed() {
         if isRecording {
             stopRecording()
@@ -71,7 +71,7 @@ struct SpeechToTextView: View {
             startRecording()
         }
     }
-    
+
     private func requestPermissions() {
         SFSpeechRecognizer.requestAuthorization { authStatus in
             DispatchQueue.main.async {
@@ -95,7 +95,7 @@ struct SpeechToTextView: View {
             }
         }
     }
-    
+
     private func startRecording() {
         Task {
             guard let recognizer = speechRecognizer, recognizer.isAvailable else {
@@ -117,10 +117,15 @@ struct SpeechToTextView: View {
             recognitionTask = recognizer.recognitionTask(with: recognitionRequest!, resultHandler: { result, error in
                 if let result = result {
                     let inputText = result.bestTranscription.formattedString
-                                    
-                    let words = inputText.split { $0 == " " }
-                    let last100Words = words.suffix(10)  // Keep the last 100 words
-                    let resultText = last100Words.joined(separator: " ")  // Join them back into a single string
+                    
+                    let words = inputText.split { $0 == " " }.map { String($0) }
+                    if let lastWord = words.last {
+                        self.updateWordCounts(word: lastWord)
+                    }
+
+                    
+                    let last100Words = words.suffix(30)
+                    let resultText = last100Words.joined(separator: " ")
                     
                     self.text = resultText
                 }
@@ -151,31 +156,43 @@ struct SpeechToTextView: View {
                     
             }
         }
-        
     }
+    
     
     private func stopRecording() {
         audioEngine.stop()
-        
         recognitionRequest?.endAudio()
-        
         recognitionTask?.cancel()
         recognitionTask = nil
         recognitionRequest = nil
-
+        
         let inputNode = audioEngine.inputNode
         inputNode.removeTap(onBus: 0)
         
-        Task {
-            let input_text = self.text
-            await processAndRunModel(input_text: input_text)
-        }
-        
         self.isRecording = false
         self.text = ""
-
-        inputText = text
         
+        saveWordCounts() // Save word count dictionary to UserDefaults
+    }
+
+    private func updateWordCounts(word: String) {
+        if let count = wordCountDictionary[word] {
+            wordCountDictionary[word] = count + 1
+        } else {
+            wordCountDictionary[word] = 1
+        }
+        saveWordCounts()
+    }
+
+
+    private func loadWordCounts() {
+        if let savedWordCounts = UserDefaults.standard.object(forKey: "wordCounts") as? [String: Int] {
+            wordCountDictionary = savedWordCounts
+        }
+    }
+
+    private func saveWordCounts() {
+        UserDefaults.standard.set(wordCountDictionary, forKey: "wordCounts")
     }
     
     private func processAndRunModel(input_text: String) async {
@@ -224,7 +241,7 @@ struct SpeechToTextView: View {
     
         let smLogits = softmax(logits: lastTokenLogits)
         print("Softmax of last token:", smLogits)
-        let num = 10
+        let num = 30
         var topNLTokens = getTopNIndices(probabilities: logitsArray, n: num)
         var topTokens = getTopNIndices(probabilities: smLogits, n: num)
     
@@ -252,3 +269,4 @@ struct SpeechToTextView: View {
         return topNIndices
     }
 }
+

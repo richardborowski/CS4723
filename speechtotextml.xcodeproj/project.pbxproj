@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		596CAAD32D9CB2C10049BAE9 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 596CAAD22D9CB2C10049BAE9 /* CoreData.framework */; };
+		596CAAD82D9CB3310049BAE9 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 596CAAD62D9CB3310049BAE9 /* Model.xcdatamodeld */; };
 		59EB3D9E2D7AB28E0048437B /* Transformers in Frameworks */ = {isa = PBXBuildFile; productRef = 59EB3D9D2D7AB28E0048437B /* Transformers */; };
 		59EB3DDC2D7BC4130048437B /* Speech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59EB3DDB2D7BC4130048437B /* Speech.framework */; };
 		59EB3DDE2D7BC5830048437B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59EB3DDD2D7BC5830048437B /* AVFoundation.framework */; };
@@ -30,6 +32,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		596CAAD22D9CB2C10049BAE9 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		596CAAD72D9CB3310049BAE9 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		59EB3D592D7A6B910048437B /* speechtotextml.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = speechtotextml.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		59EB3D6E2D7A6B930048437B /* speechtotextmlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = speechtotextmlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		59EB3D782D7A6B930048437B /* speechtotextmlUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = speechtotextmlUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -37,9 +41,22 @@
 		59EB3DDD2D7BC5830048437B /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		596CAAD12D9CB1D20049BAE9 /* Exceptions for "speechtotextml" folder in "speechtotextml" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 59EB3D582D7A6B910048437B /* speechtotextml */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		59EB3D5B2D7A6B910048437B /* speechtotextml */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				596CAAD12D9CB1D20049BAE9 /* Exceptions for "speechtotextml" folder in "speechtotextml" target */,
+			);
 			path = speechtotextml;
 			sourceTree = "<group>";
 		};
@@ -51,6 +68,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				59EB3DDE2D7BC5830048437B /* AVFoundation.framework in Frameworks */,
+				596CAAD32D9CB2C10049BAE9 /* CoreData.framework in Frameworks */,
 				59EB3DDC2D7BC4130048437B /* Speech.framework in Frameworks */,
 				59EB3D9E2D7AB28E0048437B /* Transformers in Frameworks */,
 			);
@@ -76,6 +94,7 @@
 		59EB3D502D7A6B910048437B = {
 			isa = PBXGroup;
 			children = (
+				596CAAD62D9CB3310049BAE9 /* Model.xcdatamodeld */,
 				59EB3D5B2D7A6B910048437B /* speechtotextml */,
 				59EB3DDA2D7BC4130048437B /* Frameworks */,
 				59EB3D5A2D7A6B910048437B /* Products */,
@@ -95,6 +114,7 @@
 		59EB3DDA2D7BC4130048437B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				596CAAD22D9CB2C10049BAE9 /* CoreData.framework */,
 				59EB3DDD2D7BC5830048437B /* AVFoundation.framework */,
 				59EB3DDB2D7BC4130048437B /* Speech.framework */,
 			);
@@ -243,6 +263,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				596CAAD82D9CB3310049BAE9 /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -403,15 +424,18 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"speechtotextml/Preview Content\"";
+				DEVELOPMENT_TEAM = HRC26XZUG7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "$(MARKETING_VERSION)";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "$(MARKETING_VERSION)";
+				INFOPLIST_FILE = speechtotextml/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = 1.0;
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = 1.0;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -433,15 +457,18 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"speechtotextml/Preview Content\"";
+				DEVELOPMENT_TEAM = HRC26XZUG7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "$(MARKETING_VERSION)";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "$(MARKETING_VERSION)";
+				INFOPLIST_FILE = speechtotextml/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = 1.0;
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = 1.0;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -462,7 +489,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = gt.speechtotextmlTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -480,7 +507,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = gt.speechtotextmlTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -582,6 +609,19 @@
 			productName = Transformers;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		596CAAD62D9CB3310049BAE9 /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				596CAAD72D9CB3310049BAE9 /* Model.xcdatamodel */,
+			);
+			currentVersion = 596CAAD72D9CB3310049BAE9 /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 59EB3D512D7A6B910048437B /* Project object */;
 }
