@@ -39,14 +39,28 @@ struct SpeechToTextView: View {
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundColor(.black)
-            
-            // List takes up available space by using .frame(maxHeight: .infinity)
-            List(outputTokens, id: \.self) { token in
-                Text(token)
-                    .padding()
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
+                ForEach(outputTokens, id: \.self) { token in
+                    Text(token)
+                        .font(.body)
+                        .fontWeight(.bold)
+                        .padding(12)
+                        .background(Color.blue.opacity(0.3))
+                        .foregroundColor(.white)
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule().stroke(Color.blue.opacity(0.6), lineWidth: 2)
+                        )
+                        .shadow(radius: 5)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
             }
-            .frame(maxHeight: .infinity)  // Ensure the list takes the available height
-            
+            .padding(.horizontal)
+            .frame(maxHeight: .infinity)
+
             Button(action: startButtonPressed) {
                 Text(isRecording ? "Stop" : "Start")
                     .font(.title2)
@@ -58,11 +72,14 @@ struct SpeechToTextView: View {
             .disabled(!startButtonEnabled)
             .padding()
         }
-        .frame(maxHeight: .infinity)  // Ensure VStack takes full height
+        .frame(maxHeight: .infinity)
         .onAppear {
             requestPermissions()
         }
     }
+
+
+    
 
     private func startButtonPressed() {
         if isRecording {
@@ -124,7 +141,7 @@ struct SpeechToTextView: View {
                     }
 
                     
-                    let last100Words = words.suffix(30)
+                    let last100Words = words.suffix(27)
                     let resultText = last100Words.joined(separator: " ")
                     
                     self.text = resultText

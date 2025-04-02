@@ -18,36 +18,6 @@
             endingLineNumber = "17"
             landmarkName = "encodeText(text:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "1709A0A4-C912-4EA3-BC52-8D0128FB9879 - 82b16f1b1e32d4b0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for speechtotextml.TextProcessor.encodeText(text: Swift.String) async throws -&gt; Swift.Array&lt;Swift.Int&gt;"
-                  moduleName = "speechtotextml.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/richardborowski/Desktop/speechtotextml/speechtotextml/TextProcessor.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "17"
-                  endingLineNumber = "17">
-               </Location>
-               <Location
-                  uuid = "1709A0A4-C912-4EA3-BC52-8D0128FB9879 - 82b16f1b1e32d4b0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for speechtotextml.TextProcessor.encodeText(text: Swift.String) async throws -&gt; Swift.Array&lt;Swift.Int&gt;"
-                  moduleName = "speechtotextml.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/richardborowski/Desktop/speechtotextml/speechtotextml/TextProcessor.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "17"
-                  endingLineNumber = "17">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
