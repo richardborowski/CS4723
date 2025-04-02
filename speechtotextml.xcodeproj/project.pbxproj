@@ -428,6 +428,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = speechtotextml/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "TOT AI";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = 1.0;
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = 1.0;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -461,6 +462,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = speechtotextml/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "TOT AI";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = 1.0;
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = 1.0;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
