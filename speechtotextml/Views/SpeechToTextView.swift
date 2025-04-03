@@ -2,10 +2,12 @@ import SwiftUI
 import AVFoundation
 import Speech
 import CoreML
+import CoreData
 
 struct SpeechToTextView: View {
 
     @State private var text = ""
+    @State private var fulltext = ""
     @State private var isRecording = false
     @State private var startButtonEnabled = true
     @State private var recognitionTask: SFSpeechRecognitionTask?
@@ -30,6 +32,7 @@ struct SpeechToTextView: View {
     @State private var intervalCount: Int = 0
     @State private var averageElapsedTime: String = "0.00 s"
     @State private var startTime: Date?
+
     
     init(wordCountDictionary: Binding<[String: Int]>) {
         audioEngine = AVAudioEngine()
@@ -155,6 +158,8 @@ struct SpeechToTextView: View {
                     if let result = result {
                         let inputText = result.bestTranscription.formattedString
 
+                        self.fulltext = inputText
+                        
                         let words = inputText.split { $0 == " " }.map { String($0) }
                         if let lastWord = words.last {
                             self.updateWordCounts(word: lastWord)
@@ -164,11 +169,6 @@ struct SpeechToTextView: View {
                         let resultText = last100Words.joined(separator: " ")
 
                         self.text = resultText
-                    }
-
-                    if let error = error {
-                        self.text = "Error: \(error.localizedDescription)"
-                        self.stopRecording()
                     }
                 }
             })
@@ -190,7 +190,7 @@ struct SpeechToTextView: View {
             while self.isRecording {
                 await self.processAndRunModel(input_text: self.text)
 
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                //try? await Task.sleep(nanoseconds: 1_000_000_000)
 
                 if let startTime = self.startTime {
                     let endTime = Date()
@@ -217,12 +217,33 @@ struct SpeechToTextView: View {
         
         let inputNode = audioEngine.inputNode
         inputNode.removeTap(onBus: 0)
+        saveSpeechSession()
         
         self.isRecording = false
+        
         self.text = ""
+        self.fulltext = ""
         
         saveWordCounts()
     }
+    
+    private func saveSpeechSession() {
+
+        let context = DataManager.shared.getContext()
+
+        let speechSession = SpeechSession(context: context)
+        speechSession.sessionID = UUID().uuidString
+        speechSession.startTime = startTime ?? Date()
+        speechSession.endTime = Date()
+        speechSession.speechText = fulltext
+
+        DataManager.shared.saveContext()
+        //DataManager.shared.clearDatabase()
+        DataManager.shared.exportDataToJSON()
+        print("Speech session saved!")
+
+    }
+
 
     private func updateWordCounts(word: String) {
         if let count = wordCountDictionary[word] {
