@@ -60,7 +60,8 @@ struct SpeechToTextView: View {
 
                     ScrollView {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
-                            ForEach(outputTokens, id: \.self) { token in
+                            ForEach(outputTokens.indices, id: \.self) { index in
+                                let token = outputTokens[index]
                                 Text(token)
                                     .font(.body)
                                     .fontWeight(.bold)
@@ -80,6 +81,7 @@ struct SpeechToTextView: View {
                         .padding(.horizontal)
                         .id(outputTokens)
                     }
+
                     .frame(maxHeight: .infinity)
 
                     Spacer()
