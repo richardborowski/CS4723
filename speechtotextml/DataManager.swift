@@ -34,7 +34,7 @@ class DataManager {
         return persistentContainer.viewContext
     }
 
-    func exportDataToJSON() {
+    func exportDataToJSON(userID: String) {
         let context = getContext()
         let fetchRequest: NSFetchRequest<SpeechSession> = SpeechSession.fetchRequest()
         
@@ -64,7 +64,10 @@ class DataManager {
                 return
             }
             
-            let fileURL = documentsDirectory.appendingPathComponent("speech_sessions.json")
+            let uniqueFilename = "speech_sessions_\(userID).json"
+
+            
+            let fileURL = documentsDirectory.appendingPathComponent(uniqueFilename)
             
             try jsonData.write(to: fileURL)
             print("Data exported to: \(fileURL.path)")

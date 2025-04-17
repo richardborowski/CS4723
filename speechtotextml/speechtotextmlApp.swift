@@ -2,27 +2,43 @@ import SwiftUI
 
 @main
 struct SpeechtotextmlApp: App {
-    @State private var wordCountDictionary: [String: Int] = [:]
 
+    init() {
+        let userID = getUniqueUserID()
+        print("Unique User ID: \(userID)")
+    }
+    
+    
+    func getUniqueUserID() -> String {
+        let key = "com.speechtotextml.uniqueUserID"
+
+        if let existingID = Keychain.load(key: key) {
+            return existingID
+        } else {
+            let newUUID = UUID().uuidString
+            Keychain.save(key: key, data: newUUID)
+            return newUUID
+        }
+    }
     
     var body: some Scene {
         WindowGroup {
             TabView {
-                SpeechToTextView(wordCountDictionary: $wordCountDictionary)
+                SpeechToTextView(userID: getUniqueUserID())
                     .tabItem {
                         Label("Home", systemImage: "house")
                     }
-                ContentView()
+//                ContentView()
+//                    .tabItem {
+//                        Label("Model", systemImage: "app.fill")
+//                    }
+//                TokenizerTest()
+//                    .tabItem {
+//                        Label("Tokenizer Test", systemImage: "app.fill")
+//                    }
+                TuneModelView(userID: getUniqueUserID())
                     .tabItem {
-                        Label("Model", systemImage: "app.fill")
-                    }
-                TokenizerTest()
-                    .tabItem {
-                        Label("Tokenizer Test", systemImage: "app.fill")
-                    }
-                WordCountView(wordCountDictionary: $wordCountDictionary)
-                    .tabItem {
-                        Label("Word Count", systemImage: "list.dash")
+                        Label("Fine Tune Model", systemImage: "list.dash")
                     }
             }
         }

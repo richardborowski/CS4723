@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		596CAAD32D9CB2C10049BAE9 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 596CAAD22D9CB2C10049BAE9 /* CoreData.framework */; };
 		596CAAD82D9CB3310049BAE9 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 596CAAD62D9CB3310049BAE9 /* Model.xcdatamodeld */; };
+		596CAAED2DACA8D80049BAE9 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 596CAAEC2DACA8D80049BAE9 /* ZIPFoundation */; };
 		59EB3D9E2D7AB28E0048437B /* Transformers in Frameworks */ = {isa = PBXBuildFile; productRef = 59EB3D9D2D7AB28E0048437B /* Transformers */; };
 		59EB3DDC2D7BC4130048437B /* Speech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59EB3DDB2D7BC4130048437B /* Speech.framework */; };
 		59EB3DDE2D7BC5830048437B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59EB3DDD2D7BC5830048437B /* AVFoundation.framework */; };
@@ -71,6 +72,7 @@
 				596CAAD32D9CB2C10049BAE9 /* CoreData.framework in Frameworks */,
 				59EB3DDC2D7BC4130048437B /* Speech.framework in Frameworks */,
 				59EB3D9E2D7AB28E0048437B /* Transformers in Frameworks */,
+				596CAAED2DACA8D80049BAE9 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -142,6 +144,7 @@
 			name = speechtotextml;
 			packageProductDependencies = (
 				59EB3D9D2D7AB28E0048437B /* Transformers */,
+				596CAAEC2DACA8D80049BAE9 /* ZIPFoundation */,
 			);
 			productName = speechtotextml;
 			productReference = 59EB3D592D7A6B910048437B /* speechtotextml.app */;
@@ -221,6 +224,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				59EB3D9C2D7AB28E0048437B /* XCRemoteSwiftPackageReference "swift-transformers" */,
+				596CAAEB2DACA7320049BAE9 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 59EB3D5A2D7A6B910048437B /* Products */;
@@ -428,10 +432,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = speechtotextml/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "TOT AI";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = 1.0;
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = 1.0;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app requires access to your microphone in order to capture audio for speech recognition. The audio will be processed on your device.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app uses speech recognition to transcribe your speech to text. The data may be sent to TOTai for processing and analysis to create a better experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -462,10 +466,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = speechtotextml/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "TOT AI";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = 1.0;
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = 1.0;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app requires access to your microphone in order to capture audio for speech recognition. The audio will be processed on your device.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app uses speech recognition to transcribe your speech to text. The data may be sent to TOTai for processing and analysis to create a better experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -594,6 +598,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		596CAAEB2DACA7320049BAE9 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
 		59EB3D9C2D7AB28E0048437B /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/huggingface/swift-transformers";
@@ -605,6 +617,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		596CAAEC2DACA8D80049BAE9 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 596CAAEB2DACA7320049BAE9 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
 		59EB3D9D2D7AB28E0048437B /* Transformers */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 59EB3D9C2D7AB28E0048437B /* XCRemoteSwiftPackageReference "swift-transformers" */;

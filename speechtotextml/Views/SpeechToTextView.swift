@@ -5,7 +5,6 @@ import CoreML
 import CoreData
 
 struct SpeechToTextView: View {
-
     @State private var text = ""
     @State private var fulltext = ""
     @State private var isRecording = false
@@ -23,8 +22,6 @@ struct SpeechToTextView: View {
     @State private var len: Int = 0
     @State private var outputTokens: [String] = []
     @State private var tokenizerWrapper = TokenizerWrapper()
-    
-    @Binding var wordCountDictionary: [String: Int]
 
     @State private var model: Model?
     
@@ -33,10 +30,12 @@ struct SpeechToTextView: View {
     @State private var averageElapsedTime: String = "0.00 s"
     @State private var startTime: Date?
 
+    let userID: String
+
     
-    init(wordCountDictionary: Binding<[String: Int]>) {
+    init(userID: String) {
         audioEngine = AVAudioEngine()
-        _wordCountDictionary = wordCountDictionary
+        self.userID = userID
     }
 
     var body: some View {
@@ -49,40 +48,31 @@ struct SpeechToTextView: View {
                             .font(.system(size: 10))
                             .padding(.top, 2)
                             .padding(.trailing, 5)
+                            .foregroundColor(.primary)
                     }
 
                     Text(text)
                         .font(.title)
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .frame(minHeight: 100)
 
-                    ScrollView {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
-                            ForEach(outputTokens.indices, id: \.self) { index in
-                                let token = outputTokens[index]
-                                Text(token)
-                                    .font(.body)
-                                    .fontWeight(.bold)
-                                    .padding(12)
-                                    .background(Color.blue.opacity(0.3))
-                                    .foregroundColor(.white)
-                                    .clipShape(Capsule())
-                                    .overlay(
-                                        Capsule().stroke(Color.blue.opacity(0.6), lineWidth: 2)
-                                    )
-                                    .shadow(radius: 5)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                    .fixedSize(horizontal: true, vertical: false)
+                    if isRecording {
+                        ScrollView {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
+                                ForEach(outputTokens.indices, id: \.self) { index in
+                                    let token = outputTokens[index]
+                                    Text(token)
+                                        .font(.system(size: 15, weight: .bold))
+                                        .foregroundColor(.primary)
+                                }
                             }
+                            .padding(.horizontal)
+                            .id(outputTokens)
                         }
-                        .padding(.horizontal)
-                        .id(outputTokens)
+                        .frame(maxHeight: .infinity)
                     }
-
-                    .frame(maxHeight: .infinity)
 
                     Spacer()
 
@@ -91,7 +81,7 @@ struct SpeechToTextView: View {
                             .font(.title2)
                             .padding()
                             .background(isRecording ? Color.red : Color.green)
-                            .foregroundColor(.white)
+                            .foregroundColor(.primary)
                             .cornerRadius(10)
                     }
                     .disabled(!startButtonEnabled)
@@ -163,9 +153,6 @@ struct SpeechToTextView: View {
                         self.fulltext = inputText
                         
                         let words = inputText.split { $0 == " " }.map { String($0) }
-                        if let lastWord = words.last {
-                            self.updateWordCounts(word: lastWord)
-                        }
 
                         let last100Words = words.suffix(18)
                         let resultText = last100Words.joined(separator: " ")
@@ -226,7 +213,6 @@ struct SpeechToTextView: View {
         self.text = ""
         self.fulltext = ""
         
-        saveWordCounts()
     }
     
     private func saveSpeechSession() {
@@ -241,33 +227,24 @@ struct SpeechToTextView: View {
 
         DataManager.shared.saveContext()
         //DataManager.shared.clearDatabase()
-        DataManager.shared.exportDataToJSON()
+        DataManager.shared.exportDataToJSON(userID: userID)
         print("Speech session saved!")
 
     }
 
-
-    private func updateWordCounts(word: String) {
-        if let count = wordCountDictionary[word] {
-            wordCountDictionary[word] = count + 1
-        } else {
-            wordCountDictionary[word] = 1
-        }
-        saveWordCounts()
-    }
-
-    private func loadWordCounts() {
-        if let savedWordCounts = UserDefaults.standard.object(forKey: "wordCounts") as? [String: Int] {
-            wordCountDictionary = savedWordCounts
-        }
-    }
-
-    private func saveWordCounts() {
-        UserDefaults.standard.set(wordCountDictionary, forKey: "wordCounts")
-    }
-
     private func loadModel() throws {
-        if model == nil {
+        do {
+            if let modelPath = UserDefaults.standard.string(forKey: "customModelPath") {
+                let customURL = URL(fileURLWithPath: modelPath)
+                let compiledModel = try MLModel.compileModel(at: customURL)
+                model = try Model(contentsOf: compiledModel)
+                print("Custom model loaded from \(modelPath)")
+            } else {
+                print("Loading default model")
+                model = try Model(configuration: MLModelConfiguration())
+            }
+        } catch {
+            print("Failed to load custom model: \(error.localizedDescription). Loading default instead.")
             model = try Model(configuration: MLModelConfiguration())
         }
     }
@@ -330,12 +307,30 @@ struct SpeechToTextView: View {
         }
         
         let smLogits = softmax(logits: lastTokenLogits)
-        let topTokens = getTopNIndices(probabilities: smLogits, n: 60)
+        let topTokens = getTopNIndices(probabilities: smLogits, n: 42)
         
         self.outputTokens.removeAll()
         for token in topTokens {
-            self.outputTokens.append(tokenizerWrapper.decode(tokens: [token]))
+            var word = tokenizerWrapper.decode(tokens: [token])
+            word = word.trimmingCharacters(in: .whitespacesAndNewlines)
+            let regex = try! NSRegularExpression(pattern: "[\\p{P}]", options: [])
+            let range = NSRange(location: 0, length: word.utf16.count)
+            let match = regex.firstMatch(in: word, options: [], range: range)
+
+            if word.count < 2 {
+                    continue
+            }
+            if match == nil && isRealWord(word) {
+                self.outputTokens.append(word)
+            }
         }
+    }
+    
+    func isRealWord(_ word: String) -> Bool {
+        let checker = UITextChecker()
+        let range = NSRange(location: 0, length: word.utf16.count)
+        let misspelledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
+        return misspelledRange.location == NSNotFound
     }
 
     
