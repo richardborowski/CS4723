@@ -59,19 +59,16 @@ struct SpeechToTextView: View {
                         .frame(minHeight: 100)
 
                     if isRecording {
-                        ScrollView {
-                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
-                                ForEach(outputTokens.indices, id: \.self) { index in
-                                    let token = outputTokens[index]
-                                    Text(token)
-                                        .font(.system(size: 15, weight: .bold))
-                                        .foregroundColor(.primary)
-                                }
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
+                            ForEach(outputTokens.indices, id: \.self) { index in
+                                let token = outputTokens[index]
+                                Text(token)
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.primary)
                             }
-                            .padding(.horizontal)
-                            .id(outputTokens)
                         }
-                        .frame(maxHeight: .infinity)
+                        .padding(.horizontal)
+                        .id(outputTokens)
                     }
 
                     Spacer()
@@ -90,6 +87,10 @@ struct SpeechToTextView: View {
             }
             .onAppear {
                 requestPermissions()
+                Task {
+                    try? await tokenizerWrapper.initialize()
+                    try? loadModel()
+                }
             }
         }
         .frame(maxHeight: .infinity)
@@ -175,11 +176,12 @@ struct SpeechToTextView: View {
             self.isRecording = true
             
             try? loadModel()
-            
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+
             while self.isRecording {
+
                 await self.processAndRunModel(input_text: self.text)
 
-                //try? await Task.sleep(nanoseconds: 1_000_000_000)
 
                 if let startTime = self.startTime {
                     let endTime = Date()
@@ -233,21 +235,23 @@ struct SpeechToTextView: View {
     }
 
     private func loadModel() throws {
-        do {
-            if let modelPath = UserDefaults.standard.string(forKey: "customModelPath") {
-                let customURL = URL(fileURLWithPath: modelPath)
-                let compiledModel = try MLModel.compileModel(at: customURL)
-                model = try Model(contentsOf: compiledModel)
-                print("Custom model loaded from \(modelPath)")
-            } else {
-                print("Loading default model")
+        if model == nil { 
+            do {
+                if let modelPath = UserDefaults.standard.string(forKey: "customModelPath") {
+                    let customURL = URL(fileURLWithPath: modelPath)
+                    model = try Model(contentsOf: customURL)
+                    print("Custom model loaded from \(modelPath)")
+                } else {
+                    print("Loading default model")
+                    model = try Model(configuration: MLModelConfiguration())
+                }
+            } catch {
+                print("Failed to load custom model: \(error.localizedDescription). Loading default instead.")
                 model = try Model(configuration: MLModelConfiguration())
             }
-        } catch {
-            print("Failed to load custom model: \(error.localizedDescription). Loading default instead.")
-            model = try Model(configuration: MLModelConfiguration())
         }
     }
+
     
     private func resetTimer() {
         self.startTime = Date()
