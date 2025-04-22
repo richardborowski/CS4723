@@ -1,3 +1,8 @@
 # Ignore CoreML model files
 speechtotextml/Model.mlpackage/
 
+
+speechtotextml.xcodeproj/project.xcworkspace/xcuserdata/
+
+
+speechtotextml.xcodeproj/xcuserdata/

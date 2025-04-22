@@ -12,7 +12,7 @@ class TokenizerWrapper {
         guard let tokenizer = tokenizer else {
             throw NSError(domain: "Tokenizer not initialized", code: 1, userInfo: nil)
         }
-        return try tokenizer.encode(text: text)
+        return tokenizer.encode(text: text)
     }
     
     func decode(tokens: [Int]) -> String {
@@ -23,7 +23,7 @@ class TokenizerWrapper {
         return re
     }
     
-    func padTokensAndMask(text: String) throws -> ([Int], [Int], Int) {
+    func padTokensAndMask(text: String) async throws -> ([Int], [Int], Int) {
             print(text)
             var paddedTokens = try encode(text: text)
             let len = paddedTokens.count

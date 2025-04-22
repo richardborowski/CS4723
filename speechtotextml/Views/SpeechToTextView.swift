@@ -2,12 +2,13 @@ import SwiftUI
 import AVFoundation
 import Speech
 import CoreML
+import CoreData
+
 struct SpeechToTextView: View {
-    
     @State private var text = ""
+    @State private var fulltext = ""
     @State private var isRecording = false
     @State private var startButtonEnabled = true
-    
     @State private var recognitionTask: SFSpeechRecognitionTask?
     @State private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     
@@ -21,49 +22,80 @@ struct SpeechToTextView: View {
     @State private var len: Int = 0
     @State private var outputTokens: [String] = []
     @State private var tokenizerWrapper = TokenizerWrapper()
-    
-    @State private var timer: Timer? = nil
 
-    var coreMLModel: Model!
+    @State private var model: Model?
+    
+    @State private var totalElapsedTime: TimeInterval = 0
+    @State private var intervalCount: Int = 0
+    @State private var averageElapsedTime: String = "0.00 s"
+    @State private var startTime: Date?
+
+    let userID: String
 
     
-    init() {
+    init(userID: String) {
         audioEngine = AVAudioEngine()
+        self.userID = userID
     }
-    
+
     var body: some View {
         VStack {
-            Text(text)
-                .font(.title)
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .foregroundColor(.black)
-            
-            // List takes up available space by using .frame(maxHeight: .infinity)
-            List(outputTokens, id: \.self) { token in
-                Text(token)
+            GeometryReader { geometry in
+                VStack {
+                    HStack {
+                        Spacer()
+                        Text("MT: \(averageElapsedTime)")
+                            .font(.system(size: 10))
+                            .padding(.top, 2)
+                            .padding(.trailing, 5)
+                            .foregroundColor(.primary)
+                    }
+
+                    Text(text)
+                        .font(.title)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.primary)
+                        .frame(minHeight: 100)
+
+                    if isRecording {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
+                            ForEach(outputTokens.indices, id: \.self) { index in
+                                let token = outputTokens[index]
+                                Text(token)
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        .padding(.horizontal)
+                        .id(outputTokens)
+                    }
+
+                    Spacer()
+
+                    Button(action: startButtonPressed) {
+                        Text(isRecording ? "Stop" : "Start")
+                            .font(.title2)
+                            .padding()
+                            .background(isRecording ? Color.red : Color.green)
+                            .foregroundColor(.primary)
+                            .cornerRadius(10)
+                    }
+                    .disabled(!startButtonEnabled)
                     .padding()
+                }
             }
-            .frame(maxHeight: .infinity)  // Ensure the list takes the available height
-            
-            Button(action: startButtonPressed) {
-                Text(isRecording ? "Stop" : "Start")
-                    .font(.title2)
-                    .padding()
-                    .background(isRecording ? Color.red : Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+            .onAppear {
+                requestPermissions()
+                Task {
+                    try? await tokenizerWrapper.initialize()
+                    try? loadModel()
+                }
             }
-            .disabled(!startButtonEnabled)
-            .padding()
         }
-        .frame(maxHeight: .infinity)  // Ensure VStack takes full height
-        .onAppear {
-            requestPermissions()
-        }
+        .frame(maxHeight: .infinity)
     }
-    
-    
+
     private func startButtonPressed() {
         if isRecording {
             stopRecording()
@@ -71,7 +103,7 @@ struct SpeechToTextView: View {
             startRecording()
         }
     }
-    
+
     private func requestPermissions() {
         SFSpeechRecognizer.requestAuthorization { authStatus in
             DispatchQueue.main.async {
@@ -95,7 +127,7 @@ struct SpeechToTextView: View {
             }
         }
     }
-    
+
     private func startRecording() {
         Task {
             guard let recognizer = speechRecognizer, recognizer.isAvailable else {
@@ -115,19 +147,19 @@ struct SpeechToTextView: View {
             recognitionRequest?.shouldReportPartialResults = true
             
             recognitionTask = recognizer.recognitionTask(with: recognitionRequest!, resultHandler: { result, error in
-                if let result = result {
-                    let inputText = result.bestTranscription.formattedString
-                                    
-                    let words = inputText.split { $0 == " " }
-                    let last100Words = words.suffix(10)  // Keep the last 100 words
-                    let resultText = last100Words.joined(separator: " ")  // Join them back into a single string
-                    
-                    self.text = resultText
-                }
-                
-                if let error = error {
-                    self.text = "Error: \(error.localizedDescription)"
-                    self.stopRecording()
+                DispatchQueue.main.async {
+                    if let result = result {
+                        let inputText = result.bestTranscription.formattedString
+
+                        self.fulltext = inputText
+                        
+                        let words = inputText.split { $0 == " " }.map { String($0) }
+
+                        let last100Words = words.suffix(18)
+                        let resultText = last100Words.joined(separator: " ")
+
+                        self.text = resultText
+                    }
                 }
             })
             
@@ -143,98 +175,168 @@ struct SpeechToTextView: View {
             self.text = "Listening..."
             self.isRecording = true
             
-            while self.isRecording{
-                let input_text = self.text
-                
-                await self.processAndRunModel(input_text: input_text)
-                await Task.sleep(2 * 1_000_000_000)
+            try? loadModel()
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+
+            while self.isRecording {
+
+                await self.processAndRunModel(input_text: self.text)
+
+
+                if let startTime = self.startTime {
+                    let endTime = Date()
+                    let timeInterval = endTime.timeIntervalSince(startTime)
                     
+                    totalElapsedTime += timeInterval
+                    intervalCount += 1
+                    
+                    let averageTime = totalElapsedTime / Double(intervalCount)
+                    self.averageElapsedTime = String(format: "%.2f s", averageTime)
+                    
+                    self.startTime = Date()
+                }
             }
         }
-        
     }
     
     private func stopRecording() {
         audioEngine.stop()
-        
         recognitionRequest?.endAudio()
-        
         recognitionTask?.cancel()
         recognitionTask = nil
         recognitionRequest = nil
-
+        
         let inputNode = audioEngine.inputNode
         inputNode.removeTap(onBus: 0)
-        
-        Task {
-            let input_text = self.text
-            await processAndRunModel(input_text: input_text)
-        }
+        saveSpeechSession()
         
         self.isRecording = false
+        
         self.text = ""
-
-        inputText = text
+        self.fulltext = ""
         
     }
     
-    private func processAndRunModel(input_text: String) async {
+    private func saveSpeechSession() {
+
+        let context = DataManager.shared.getContext()
+
+        let speechSession = SpeechSession(context: context)
+        speechSession.sessionID = UUID().uuidString
+        speechSession.startTime = startTime ?? Date()
+        speechSession.endTime = Date()
+        speechSession.speechText = fulltext
+
+        DataManager.shared.saveContext()
+        //DataManager.shared.clearDatabase()
+        DataManager.shared.exportDataToJSON(userID: userID)
+        print("Speech session saved!")
+
+    }
+
+    private func loadModel() throws {
+        if model == nil { 
             do {
-                if tokenizerWrapper.tokenizer == nil {
-                    try await tokenizerWrapper.initialize()
+                if let modelPath = UserDefaults.standard.string(forKey: "customModelPath") {
+                    let customURL = URL(fileURLWithPath: modelPath)
+                    model = try Model(contentsOf: customURL)
+                    print("Custom model loaded from \(modelPath)")
+                } else {
+                    print("Loading default model")
+                    model = try Model(configuration: MLModelConfiguration())
                 }
-                (paddedTokens, attentionMask, len) = try await tokenizerWrapper.padTokensAndMask(text: input_text)
-                resultText = "Text encoded and attention mask created!"
-                
-                try await runModel(paddedTokens: paddedTokens, attentionMask: attentionMask, size: len)
             } catch {
-                resultText = "Error: \(error.localizedDescription)"
-                print("Error: \(error.localizedDescription)")
+                print("Failed to load custom model: \(error.localizedDescription). Loading default instead.")
+                model = try Model(configuration: MLModelConfiguration())
             }
         }
+    }
+
     
+    private func resetTimer() {
+        self.startTime = Date()
+    }
+
+    private func processAndRunModel(input_text: String) async {
+        self.resetTimer()
+
+        do {
+            if tokenizerWrapper.tokenizer == nil {
+                try await tokenizerWrapper.initialize()
+            }
+            
+            let (paddedTokens, attentionMask, len) = try await tokenizerWrapper.padTokensAndMask(text: input_text)
+
+            resultText = "Text encoded and attention mask created!"
+            
+            try await runModel(paddedTokens: paddedTokens, attentionMask: attentionMask, size: len)
+        } catch {
+            resultText = "Error: \(error.localizedDescription)"
+            print("Error: \(error.localizedDescription)")
+        }
+    }
+
     func runModel(paddedTokens: [Int], attentionMask: [Int], size: Int) async throws {
-        guard let model = try? Model(configuration: MLModelConfiguration()) else {
+        guard let model = model else {
             throw NSError(domain: "CoreMLModelError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Model loading failed."])
         }
-        
+
         let inputTokens = try MLMultiArray(shape: [1, 128] as [NSNumber], dataType: .int32)
-        for (index, token) in paddedTokens.prefix(128).enumerated() {
-            inputTokens[index] = NSNumber(value: token)
-        }
         let inputMask = try MLMultiArray(shape: [1, 128] as [NSNumber], dataType: .int32)
-        for (index, mask) in attentionMask.prefix(128).enumerated() {
-            inputMask[index] = NSNumber(value: mask)
+        
+        async let tokenProcessing = Task {
+            for (index, token) in paddedTokens.prefix(128).enumerated() {
+                inputTokens[index] = NSNumber(value: token)
+            }
         }
         
+        async let maskProcessing = Task {
+            for (index, mask) in attentionMask.prefix(128).enumerated() {
+                inputMask[index] = NSNumber(value: mask)
+            }
+        }
+        
+        await tokenProcessing.value
+        await maskProcessing.value
+
         let output = try model.prediction(input_ids: inputTokens, attention_mask: inputMask)
-    
-        var logitsArray: [Float] = []
+        
         var lastTokenLogits: [Float] = []
         if let logits = output.featureValue(for: "logits")?.multiArrayValue {
-            let vocabSize = logits.shape[2].intValue  // Vocabulary size (e.g., 50257 for GPT-based models)
-
-    
+            let vocabSize = logits.shape[2].intValue
             for i in 0..<vocabSize {
-                let index = (size - 1) * vocabSize + i  // Compute index for last token
+                let index = (size - 1) * vocabSize + i
                 lastTokenLogits.append(logits[index].floatValue)
             }
-
-        }
-    
-        let smLogits = softmax(logits: lastTokenLogits)
-        print("Softmax of last token:", smLogits)
-        let num = 10
-        var topNLTokens = getTopNIndices(probabilities: logitsArray, n: num)
-        var topTokens = getTopNIndices(probabilities: smLogits, n: num)
-    
-        self.outputTokens.removeAll()
-        for i in 0..<num {
-            let token = topTokens[i]
-            self.outputTokens.append(tokenizerWrapper.decode(tokens: [token]))
         }
         
+        let smLogits = softmax(logits: lastTokenLogits)
+        let topTokens = getTopNIndices(probabilities: smLogits, n: 42)
+        
+        self.outputTokens.removeAll()
+        for token in topTokens {
+            var word = tokenizerWrapper.decode(tokens: [token])
+            word = word.trimmingCharacters(in: .whitespacesAndNewlines)
+            let regex = try! NSRegularExpression(pattern: "[\\p{P}]", options: [])
+            let range = NSRange(location: 0, length: word.utf16.count)
+            let match = regex.firstMatch(in: word, options: [], range: range)
+
+            if word.count < 2 {
+                    continue
+            }
+            if match == nil && isRealWord(word) {
+                self.outputTokens.append(word)
+            }
+        }
     }
+    
+    func isRealWord(_ word: String) -> Bool {
+        let checker = UITextChecker()
+        let range = NSRange(location: 0, length: word.utf16.count)
+        let misspelledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
+        return misspelledRange.location == NSNotFound
+    }
+
     
     func softmax(logits: [Float]) -> [Float] {
         let maxLogit = logits.max() ?? 0.0
@@ -243,12 +345,11 @@ struct SpeechToTextView: View {
         return exponentiated.map { $0 / sum }
     }
     
-    
     func getTopNIndices(probabilities: [Float], n: Int) -> [Int] {
-        let sortedIndices = probabilities.enumerated()
+        return probabilities.enumerated()
             .sorted { $0.element > $1.element }
-        let topNIndices = sortedIndices.prefix(n).map { $0.offset }
-        
-        return topNIndices
+            .prefix(n)
+            .map { $0.offset }
     }
 }
+

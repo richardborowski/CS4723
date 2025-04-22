@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		596CAAD32D9CB2C10049BAE9 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 596CAAD22D9CB2C10049BAE9 /* CoreData.framework */; };
+		596CAAD82D9CB3310049BAE9 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 596CAAD62D9CB3310049BAE9 /* Model.xcdatamodeld */; };
+		596CAAED2DACA8D80049BAE9 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 596CAAEC2DACA8D80049BAE9 /* ZIPFoundation */; };
 		59EB3D9E2D7AB28E0048437B /* Transformers in Frameworks */ = {isa = PBXBuildFile; productRef = 59EB3D9D2D7AB28E0048437B /* Transformers */; };
 		59EB3DDC2D7BC4130048437B /* Speech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59EB3DDB2D7BC4130048437B /* Speech.framework */; };
 		59EB3DDE2D7BC5830048437B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59EB3DDD2D7BC5830048437B /* AVFoundation.framework */; };
@@ -30,6 +33,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		596CAAD22D9CB2C10049BAE9 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		596CAAD72D9CB3310049BAE9 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		59EB3D592D7A6B910048437B /* speechtotextml.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = speechtotextml.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		59EB3D6E2D7A6B930048437B /* speechtotextmlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = speechtotextmlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		59EB3D782D7A6B930048437B /* speechtotextmlUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = speechtotextmlUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -37,9 +42,22 @@
 		59EB3DDD2D7BC5830048437B /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		596CAAD12D9CB1D20049BAE9 /* Exceptions for "speechtotextml" folder in "speechtotextml" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 59EB3D582D7A6B910048437B /* speechtotextml */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		59EB3D5B2D7A6B910048437B /* speechtotextml */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				596CAAD12D9CB1D20049BAE9 /* Exceptions for "speechtotextml" folder in "speechtotextml" target */,
+			);
 			path = speechtotextml;
 			sourceTree = "<group>";
 		};
@@ -51,8 +69,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				59EB3DDE2D7BC5830048437B /* AVFoundation.framework in Frameworks */,
+				596CAAD32D9CB2C10049BAE9 /* CoreData.framework in Frameworks */,
 				59EB3DDC2D7BC4130048437B /* Speech.framework in Frameworks */,
 				59EB3D9E2D7AB28E0048437B /* Transformers in Frameworks */,
+				596CAAED2DACA8D80049BAE9 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,6 +96,7 @@
 		59EB3D502D7A6B910048437B = {
 			isa = PBXGroup;
 			children = (
+				596CAAD62D9CB3310049BAE9 /* Model.xcdatamodeld */,
 				59EB3D5B2D7A6B910048437B /* speechtotextml */,
 				59EB3DDA2D7BC4130048437B /* Frameworks */,
 				59EB3D5A2D7A6B910048437B /* Products */,
@@ -95,6 +116,7 @@
 		59EB3DDA2D7BC4130048437B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				596CAAD22D9CB2C10049BAE9 /* CoreData.framework */,
 				59EB3DDD2D7BC5830048437B /* AVFoundation.framework */,
 				59EB3DDB2D7BC4130048437B /* Speech.framework */,
 			);
@@ -122,6 +144,7 @@
 			name = speechtotextml;
 			packageProductDependencies = (
 				59EB3D9D2D7AB28E0048437B /* Transformers */,
+				596CAAEC2DACA8D80049BAE9 /* ZIPFoundation */,
 			);
 			productName = speechtotextml;
 			productReference = 59EB3D592D7A6B910048437B /* speechtotextml.app */;
@@ -201,6 +224,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				59EB3D9C2D7AB28E0048437B /* XCRemoteSwiftPackageReference "swift-transformers" */,
+				596CAAEB2DACA7320049BAE9 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 59EB3D5A2D7A6B910048437B /* Products */;
@@ -243,6 +267,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				596CAAD82D9CB3310049BAE9 /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -403,15 +428,19 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"speechtotextml/Preview Content\"";
+				DEVELOPMENT_TEAM = HRC26XZUG7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "$(MARKETING_VERSION)";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "$(MARKETING_VERSION)";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_FILE = speechtotextml/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app requires access to your microphone in order to capture audio for speech recognition. The audio will be processed on your device.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app uses speech recognition to transcribe your speech to text. The data may be sent to TOTai for processing and analysis to create a better experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -433,15 +462,19 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"speechtotextml/Preview Content\"";
+				DEVELOPMENT_TEAM = HRC26XZUG7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "$(MARKETING_VERSION)";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "$(MARKETING_VERSION)";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_FILE = speechtotextml/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app requires access to your microphone in order to capture audio for speech recognition. The audio will be processed on your device.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app uses speech recognition to transcribe your speech to text. The data may be sent to TOTai for processing and analysis to create a better experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -462,7 +495,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = gt.speechtotextmlTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -480,7 +513,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = gt.speechtotextmlTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -565,6 +598,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		596CAAEB2DACA7320049BAE9 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
 		59EB3D9C2D7AB28E0048437B /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/huggingface/swift-transformers";
@@ -576,12 +617,30 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		596CAAEC2DACA8D80049BAE9 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 596CAAEB2DACA7320049BAE9 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
 		59EB3D9D2D7AB28E0048437B /* Transformers */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 59EB3D9C2D7AB28E0048437B /* XCRemoteSwiftPackageReference "swift-transformers" */;
 			productName = Transformers;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		596CAAD62D9CB3310049BAE9 /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				596CAAD72D9CB3310049BAE9 /* Model.xcdatamodel */,
+			);
+			currentVersion = 596CAAD72D9CB3310049BAE9 /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 59EB3D512D7A6B910048437B /* Project object */;
 }
