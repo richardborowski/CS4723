@@ -36,6 +36,10 @@ struct SpeechtotextmlApp: App {
 //                    .tabItem {
 //                        Label("Tokenizer Test", systemImage: "app.fill")
 //                    }
+                SpeechSessionsView(userID: getUniqueUserID())
+                    .tabItem {
+                        Label("Speech Sessions", systemImage: "list.bullet")
+                    }
                 TuneModelView(userID: getUniqueUserID())
                     .tabItem {
                         Label("Fine Tune Model", systemImage: "list.dash")
