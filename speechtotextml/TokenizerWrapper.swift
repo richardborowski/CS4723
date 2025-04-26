@@ -24,7 +24,6 @@ class TokenizerWrapper {
     }
     
     func padTokensAndMask(text: String) async throws -> ([Int], [Int], Int) {
-            print(text)
             var paddedTokens = try encode(text: text)
             let len = paddedTokens.count
             var attentionMask = [Int]()

@@ -28,6 +28,7 @@ struct SpeechToTextView: View {
     @State private var totalElapsedTime: TimeInterval = 0
     @State private var intervalCount: Int = 0
     @State private var averageElapsedTime: String = "0.00 s"
+    @State private var modelStartTime: Date?
     @State private var startTime: Date?
 
     let userID: String
@@ -130,6 +131,7 @@ struct SpeechToTextView: View {
 
     private func startRecording() {
         Task {
+            self.startTime = Date()
             guard let recognizer = speechRecognizer, recognizer.isAvailable else {
                 self.text = "Speech recognizer is not available."
                 return
@@ -150,14 +152,11 @@ struct SpeechToTextView: View {
                 DispatchQueue.main.async {
                     if let result = result {
                         let inputText = result.bestTranscription.formattedString
-
                         self.fulltext = inputText
                         
                         let words = inputText.split { $0 == " " }.map { String($0) }
-
                         let last100Words = words.suffix(18)
                         let resultText = last100Words.joined(separator: " ")
-
                         self.text = resultText
                     }
                 }
@@ -175,15 +174,18 @@ struct SpeechToTextView: View {
             self.text = "Listening..."
             self.isRecording = true
             
+            // Log the start time
+            if modelStartTime == nil {
+                self.modelStartTime = Date()
+            }
+            
             try? loadModel()
             try? await Task.sleep(nanoseconds: 1_000_000_000)
 
             while self.isRecording {
-
                 await self.processAndRunModel(input_text: self.text)
 
-
-                if let startTime = self.startTime {
+                if let startTime = self.modelStartTime {
                     let endTime = Date()
                     let timeInterval = endTime.timeIntervalSince(startTime)
                     
@@ -193,11 +195,12 @@ struct SpeechToTextView: View {
                     let averageTime = totalElapsedTime / Double(intervalCount)
                     self.averageElapsedTime = String(format: "%.2f s", averageTime)
                     
-                    self.startTime = Date()
+                    self.modelStartTime = Date()  // Reset start time for the next cycle
                 }
             }
         }
     }
+
     
     private func stopRecording() {
         audioEngine.stop()
@@ -208,27 +211,37 @@ struct SpeechToTextView: View {
         
         let inputNode = audioEngine.inputNode
         inputNode.removeTap(onBus: 0)
-        saveSpeechSession()
+        
+
+        // Log the end time
+        let endTime = Date()
+        
+        // Save the speech session to CoreData
+        saveSpeechSession(endTime: endTime)
         
         self.isRecording = false
-        
         self.text = ""
         self.fulltext = ""
-        
     }
-    
-    private func saveSpeechSession() {
 
+    
+    private func saveSpeechSession(endTime: Date) {
+        
+        let trimmedText = fulltext.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty else {
+            print("Empty session — not saving.")
+            return
+        }
+        
         let context = DataManager.shared.getContext()
 
         let speechSession = SpeechSession(context: context)
         speechSession.sessionID = UUID().uuidString
         speechSession.startTime = startTime ?? Date()
-        speechSession.endTime = Date()
+        speechSession.endTime = endTime
         speechSession.speechText = fulltext
 
         DataManager.shared.saveContext()
-        //DataManager.shared.clearDatabase()
         DataManager.shared.exportDataToJSON(userID: userID)
         print("Speech session saved!")
 
@@ -254,7 +267,7 @@ struct SpeechToTextView: View {
 
     
     private func resetTimer() {
-        self.startTime = Date()
+        self.modelStartTime = Date()
     }
 
     private func processAndRunModel(input_text: String) async {
