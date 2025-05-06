@@ -5,6 +5,9 @@ import CoreML
 import CoreData
 
 struct SpeechToTextView: View {
+    @ObservedObject var modelManager: ModelManager
+    
+    
     @State private var text = ""
     @State private var fulltext = ""
     @State private var isRecording = false
@@ -22,8 +25,6 @@ struct SpeechToTextView: View {
     @State private var len: Int = 0
     @State private var outputTokens: [String] = []
     @State private var tokenizerWrapper = TokenizerWrapper()
-
-    @State private var model: Model?
     
     @State private var totalElapsedTime: TimeInterval = 0
     @State private var intervalCount: Int = 0
@@ -34,9 +35,10 @@ struct SpeechToTextView: View {
     let userID: String
 
     
-    init(userID: String) {
+    init(modelManager: ModelManager, userID: String) {
         audioEngine = AVAudioEngine()
         self.userID = userID
+        self.modelManager = modelManager
     }
 
     var body: some View {
@@ -53,22 +55,33 @@ struct SpeechToTextView: View {
                     }
 
                     Text(text)
+                        .bold()
                         .font(.title)
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(.primary)
                         .frame(minHeight: 100)
 
+
                     if isRecording {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
-                            ForEach(outputTokens.indices, id: \.self) { index in
-                                let token = outputTokens[index]
-                                Text(token)
-                                    .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.primary)
+                        ScrollView {
+                            WordWrapView(spacing: 12) {
+                                ForEach(outputTokens.indices, id: \.self) { index in
+                                    let token = outputTokens[index]
+                                    let baseSize: CGFloat = 35
+                                    let minSize: CGFloat = 10
+                                    let step = CGFloat(index) * 0.5
+                                    let fontSize = max(baseSize - step, minSize)
+
+                                    Text(token)
+                                        .font(.system(size: fontSize))
+                                        .foregroundColor(.primary)
+                                        .lineLimit(1)
+                                        .fixedSize()
+                                }
                             }
+                            .padding()
                         }
-                        .padding(.horizontal)
                         .id(outputTokens)
                     }
 
@@ -90,12 +103,103 @@ struct SpeechToTextView: View {
                 requestPermissions()
                 Task {
                     try? await tokenizerWrapper.initialize()
-                    try? loadModel()
+                    try? await modelManager.loadModel()
                 }
             }
         }
         .frame(maxHeight: .infinity)
     }
+    
+    struct WordWrapView: Layout {
+        var spacing: CGFloat = 8
+        var minFontSize: CGFloat = 10
+        var maxFontSize: CGFloat = 35
+
+        func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+            var width: CGFloat = 0
+            var height: CGFloat = 0
+            var lineHeight: CGFloat = 0
+            let maxWidth = proposal.width ?? .infinity
+
+            for view in subviews {
+                let size = view.sizeThatFits(.unspecified)
+
+                if width + size.width > maxWidth {
+                    width = 0
+                    height += lineHeight + spacing
+                    lineHeight = 0
+                }
+
+                width += size.width + spacing
+                lineHeight = max(lineHeight, size.height)
+            }
+
+            height += lineHeight
+            return CGSize(width: maxWidth, height: height)
+        }
+
+        func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+            var y: CGFloat = 0
+            var lineHeight: CGFloat = 0
+            var lineWidths: [CGFloat] = []
+            var currentLineWidth: CGFloat = 0
+
+            let leftPadding: CGFloat = 20
+            let spacing: CGFloat = 10
+
+            for view in subviews {
+                let size = view.sizeThatFits(.unspecified)
+
+                if currentLineWidth + size.width > bounds.width {
+                    lineWidths.append(currentLineWidth)
+                    currentLineWidth = size.width + spacing
+                    y += lineHeight + spacing
+                } else {
+                    currentLineWidth += size.width + spacing
+                }
+                lineHeight = max(lineHeight, size.height)
+            }
+
+            lineWidths.append(currentLineWidth)
+
+            y = 0
+            var currentLineIndex = 0
+            var currentX: CGFloat = 0
+            var itemsInFirstLine = 0
+
+            for view in subviews {
+                let size = view.sizeThatFits(.unspecified)
+
+                if currentX + size.width > bounds.width {
+                    currentLineIndex += 1
+                    currentX = 0
+                    y += lineHeight + spacing
+                }
+
+                if currentLineIndex == 0 {
+                    itemsInFirstLine += 1
+                    let decayFactor = max(0, min(1, CGFloat(itemsInFirstLine) / CGFloat(subviews.count)))
+                    let fontSize = maxFontSize - (maxFontSize - minFontSize) * decayFactor
+                    if let label = view as? UILabel {
+                        label.font = UIFont.systemFont(ofSize: fontSize)
+                    }
+                }
+
+                let lineWidth = lineWidths[currentLineIndex]
+                let centeredX = (bounds.width - lineWidth) / 2 + leftPadding
+
+                view.place(
+                    at: CGPoint(x: centeredX + currentX, y: bounds.minY + y),
+                    proposal: ProposedViewSize(width: size.width, height: size.height)
+                )
+
+                currentX += size.width + spacing
+            }
+        }
+    }
+
+
+
 
     private func startButtonPressed() {
         if isRecording {
@@ -155,7 +259,7 @@ struct SpeechToTextView: View {
                         self.fulltext = inputText
                         
                         let words = inputText.split { $0 == " " }.map { String($0) }
-                        let last100Words = words.suffix(18)
+                        let last100Words = words.suffix(20)
                         let resultText = last100Words.joined(separator: " ")
                         self.text = resultText
                     }
@@ -174,12 +278,10 @@ struct SpeechToTextView: View {
             self.text = "Listening..."
             self.isRecording = true
             
-            // Log the start time
             if modelStartTime == nil {
                 self.modelStartTime = Date()
             }
             
-            try? loadModel()
             try? await Task.sleep(nanoseconds: 1_000_000_000)
 
             while self.isRecording {
@@ -195,7 +297,7 @@ struct SpeechToTextView: View {
                     let averageTime = totalElapsedTime / Double(intervalCount)
                     self.averageElapsedTime = String(format: "%.2f s", averageTime)
                     
-                    self.modelStartTime = Date()  // Reset start time for the next cycle
+                    self.modelStartTime = Date()
                 }
             }
         }
@@ -212,11 +314,8 @@ struct SpeechToTextView: View {
         let inputNode = audioEngine.inputNode
         inputNode.removeTap(onBus: 0)
         
-
-        // Log the end time
         let endTime = Date()
         
-        // Save the speech session to CoreData
         saveSpeechSession(endTime: endTime)
         
         self.isRecording = false
@@ -247,24 +346,6 @@ struct SpeechToTextView: View {
 
     }
 
-    private func loadModel() throws {
-        if model == nil { 
-            do {
-                if let modelPath = UserDefaults.standard.string(forKey: "customModelPath") {
-                    let customURL = URL(fileURLWithPath: modelPath)
-                    model = try Model(contentsOf: customURL)
-                    print("Custom model loaded from \(modelPath)")
-                } else {
-                    print("Loading default model")
-                    model = try Model(configuration: MLModelConfiguration())
-                }
-            } catch {
-                print("Failed to load custom model: \(error.localizedDescription). Loading default instead.")
-                model = try Model(configuration: MLModelConfiguration())
-            }
-        }
-    }
-
     
     private func resetTimer() {
         self.modelStartTime = Date()
@@ -290,7 +371,7 @@ struct SpeechToTextView: View {
     }
 
     func runModel(paddedTokens: [Int], attentionMask: [Int], size: Int) async throws {
-        guard let model = model else {
+        guard let model = modelManager.model else {
             throw NSError(domain: "CoreMLModelError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Model loading failed."])
         }
 
@@ -324,7 +405,7 @@ struct SpeechToTextView: View {
         }
         
         let smLogits = softmax(logits: lastTokenLogits)
-        let topTokens = getTopNIndices(probabilities: smLogits, n: 42)
+        let topTokens = getTopNIndices(probabilities: smLogits, n: 500)
         
         self.outputTokens.removeAll()
         for token in topTokens {

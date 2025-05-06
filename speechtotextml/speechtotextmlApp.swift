@@ -2,8 +2,11 @@ import SwiftUI
 
 @main
 struct SpeechtotextmlApp: App {
+    
+    @ObservedObject var modelManager: ModelManager
 
     init() {
+        modelManager = ModelManager()
         let userID = getUniqueUserID()
         print("Unique User ID: \(userID)")
     }
@@ -24,7 +27,7 @@ struct SpeechtotextmlApp: App {
     var body: some Scene {
         WindowGroup {
             TabView {
-                SpeechToTextView(userID: getUniqueUserID())
+                SpeechToTextView(modelManager: modelManager, userID: getUniqueUserID())
                     .tabItem {
                         Label("Home", systemImage: "house")
                     }
@@ -40,7 +43,7 @@ struct SpeechtotextmlApp: App {
                     .tabItem {
                         Label("Speech Sessions", systemImage: "list.bullet")
                     }
-                TuneModelView(userID: getUniqueUserID())
+                TuneModelView(modelManager: modelManager, userID: getUniqueUserID())
                     .tabItem {
                         Label("Fine Tune Model", systemImage: "list.dash")
                     }

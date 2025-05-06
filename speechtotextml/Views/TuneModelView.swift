@@ -3,6 +3,7 @@ import CoreML
 import ZIPFoundation
 
 struct TuneModelView: View {
+    @ObservedObject var modelManager: ModelManager
     let userID: String
     
     @State private var uploadStatus: String = ""
@@ -14,8 +15,13 @@ struct TuneModelView: View {
             Text("Update Recommendations")
                 .font(.title2)
                 .padding()
-            
+
+            Text(modelManager.isUsingCustomModel ? "Using Fine-Tuned Model" : "Using Default Model")
+                .font(.headline)
+                .padding()
+
             Button(action: {
+                modelManager.resetModel()
                 uploadFile(userId: userID)
             }) {
                 Text("Send")
@@ -28,15 +34,23 @@ struct TuneModelView: View {
             }
             .padding(.horizontal)
             .disabled(isFineTuning)
+            
             ProgressView(uploadStatus, value: progress, total: 1.0)
                 .progressViewStyle(LinearProgressViewStyle())
                 .padding()
+            
+            
+            Toggle("Use Fine-Tuned Model", isOn: $modelManager.isUsingCustomModel)
+                .padding()
+                .onChange(of: modelManager.isUsingCustomModel) { newValue in
+                    modelManager.toggleModel()
+                }
+
         }
         .padding()
     }
     
     func uploadFile(userId: String) {
-
         Task {
             let fileManager = FileManager.default
             guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
@@ -78,7 +92,6 @@ struct TuneModelView: View {
                 }
             }
             
-
             await performUpload(userId: userId)
         }
     }
@@ -168,7 +181,10 @@ struct TuneModelView: View {
             try data.write(to: zipFileURL)
 
             let unzipDirectoryURL = documentsURL.appendingPathComponent("UnzippedModel_\(userId)")
-            try? fileManager.removeItem(at: unzipDirectoryURL)
+            
+            if fileManager.fileExists(atPath: unzipDirectoryURL.path) {
+                try? fileManager.removeItem(at: unzipDirectoryURL)
+            }
             try fileManager.createDirectory(at: unzipDirectoryURL, withIntermediateDirectories: true)
 
             guard let archive = Archive(url: zipFileURL, accessMode: .read) else {
@@ -179,17 +195,40 @@ struct TuneModelView: View {
                 return
             }
 
+            try? fileManager.removeItem(at: zipFileURL)
+
             for entry in archive {
                 let destinationURL = unzipDirectoryURL.appendingPathComponent(entry.path)
                 try fileManager.createDirectory(at: destinationURL.deletingLastPathComponent(), withIntermediateDirectories: true)
                 try archive.extract(entry, to: destinationURL)
             }
+            
+            let mlpackageURL = unzipDirectoryURL.appendingPathComponent("Model.mlpackage")
 
-            let compiledModelURL = unzipDirectoryURL.appendingPathComponent("Model.mlpackage")
-            let compiledModel = try await MLModel.compileModel(at: compiledModelURL)
-            let _ = try MLModel(contentsOf: compiledModel)
+            guard fileManager.fileExists(atPath: mlpackageURL.path) else {
+                await MainActor.run {
+                    self.uploadStatus = "Model package not found after unzip"
+                    self.isFineTuning = false
+                }
+                return
+            }
+            
+            let compiledURL = try await MLModel.compileModel(at: mlpackageURL)
 
-            UserDefaults.standard.set(compiledModelURL.path, forKey: "customModelPath")
+            let fileManager = FileManager.default
+            guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                throw NSError(domain: "FileError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Cannot access Documents directory"])
+            }
+            
+            let savedCompiledModelURL = documentsURL.appendingPathComponent("SavedModel.mlmodelc")
+
+            if fileManager.fileExists(atPath: savedCompiledModelURL.path) {
+                try fileManager.removeItem(at: savedCompiledModelURL)
+            }
+            
+            try fileManager.copyItem(at: compiledURL, to: savedCompiledModelURL)
+
+            UserDefaults.standard.set(savedCompiledModelURL.path, forKey: "customModelPath")
 
             for _ in 0..<25 {
                 try? await Task.sleep(nanoseconds: 100_000_000)
@@ -210,5 +249,4 @@ struct TuneModelView: View {
             }
         }
     }
-
 }

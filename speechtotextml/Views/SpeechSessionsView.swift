@@ -4,7 +4,7 @@ import CoreData
 struct SpeechSessionModel: Codable, Identifiable {
     var id: String { sessionID }
     let sessionID: String
-    let startTime: String // ISO date format
+    let startTime: String
     let endTime: String
     let speechText: String
 }
@@ -81,7 +81,7 @@ struct SpeechSessionsView: View {
         do {
             let data = try Data(contentsOf: fileURL)
             let decoded = try JSONDecoder().decode([SpeechSessionModel].self, from: data)
-            self.sessions = decoded
+            self.sessions = decoded.reversed()
         } catch {
             print("Error loading JSON: \(error)")
         }
@@ -119,7 +119,6 @@ struct SpeechSessionsView: View {
         }
     }
     
-    // Helper function to format the startTime to desired format
     func formattedStartTime(from isoString: String) -> String {
         let formatter = ISO8601DateFormatter()
         
@@ -132,6 +131,6 @@ struct SpeechSessionsView: View {
             return displayFormatter.string(from: date)
         }
         
-        return isoString // Return original if date parsing fails
+        return isoString
     }
 }
