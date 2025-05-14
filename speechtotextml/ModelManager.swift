@@ -79,4 +79,12 @@ class ModelManager: ObservableObject {
             }
         }
     }
+    
+    func modelNotLoaded() -> Bool {
+        return model == nil
+    }
+    
+    func modelLoaded() -> Bool {
+        return model == nil
+    }
 }

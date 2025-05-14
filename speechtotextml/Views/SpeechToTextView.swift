@@ -103,7 +103,9 @@ struct SpeechToTextView: View {
                 requestPermissions()
                 Task {
                     try? await tokenizerWrapper.initialize()
-                    try? await modelManager.loadModel()
+                    if modelManager.modelNotLoaded() {
+                        try? await modelManager.loadModel()
+                    }
                 }
             }
         }
@@ -405,7 +407,7 @@ struct SpeechToTextView: View {
         }
         
         let smLogits = softmax(logits: lastTokenLogits)
-        let topTokens = getTopNIndices(probabilities: smLogits, n: 500)
+        let topTokens = getTopNIndices(probabilities: smLogits, n: 50)
         
         self.outputTokens.removeAll()
         for token in topTokens {
@@ -418,7 +420,8 @@ struct SpeechToTextView: View {
             if word.count < 2 {
                     continue
             }
-            if match == nil && isRealWord(word) {
+            
+            if isRealWord(word) && match == nil {
                 self.outputTokens.append(word)
             }
         }
